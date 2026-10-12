@@ -1,0 +1,157 @@
+import java.util.*;
+
+// Represents a Product in the store catalog
+class Product {
+    private String id;
+    private String name;
+    private double price;
+
+    public Product(String id, String name, double price) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+    }
+
+    public String getId() { return id; }
+    public String getName() { return name; }
+    public double getPrice() { return price; }
+
+    @Override
+    public String toString() {
+        return String.format("Product[ID: %s, Name: %s, Price: $%.2f]", id, name, price);
+    }
+}
+
+// Represents a Customer Order with Priority
+class Order implements Comparable<Order> {
+    private String orderId;
+    private String productId;
+    private int priority; // Lower integer value = Higher priority (e.g., 1 = VIP, 2 = Express, 3 = Standard)
+
+    public Order(String orderId, String productId, int priority) {
+        this.orderId = orderId;
+        this.productId = productId;
+        this.priority = priority;
+    }
+
+    public String getOrderId() { return orderId; }
+    public String getProductId() { return productId; }
+    public int getPriority() { return priority; }
+
+    // Comparator logic for PriorityQueue (Min-Heap based on priority rank)
+    @Override
+    public int compareTo(Order other) {
+        return Integer.compare(this.priority, other.priority);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Order[ID: %s, ProductID: %s, Priority Rank: %d]", orderId, productId, priority);
+    }
+}
+
+// System Manager combining Linear and Non-Linear structures
+class OnlineShoppingSystem {
+    // Non-Linear: HashMap for O(1) fast product lookup by ID
+    private Map<String, Product> productCatalog;
+
+    // Non-Linear: PriorityQueue (Min-Heap) for order processing by priority
+    private PriorityQueue<Order> orderQueue;
+
+    // Linear: ArrayList for keeping track of fulfilled order history
+    private List<String> executionHistory;
+
+    public OnlineShoppingSystem() {
+        this.productCatalog = new HashMap<>();
+        this.orderQueue = new PriorityQueue<>();
+        this.executionHistory = new ArrayList<>();
+    }
+
+    // Add product to catalog
+    public void addProduct(Product product) {
+        productCatalog.put(product.getId(), product);
+        System.out.println("Added to Catalog: " + product);
+    }
+
+    // Fast search by ID - O(1) Time Complexity
+    public Product searchProductById(String productId) {
+        return productCatalog.get(productId);
+    }
+
+    // Place an order into priority queue
+    public void placeOrder(Order order) {
+        if (!productCatalog.containsKey(order.getProductId())) {
+            System.out.println("Cannot place order. Product ID " + order.getProductId() + " not found!");
+            return;
+        }
+        orderQueue.add(order);
+        System.out.println("Order Placed: " + order);
+    }
+
+    // Process all pending orders in priority order
+    public void processNextOrder() {
+        if (orderQueue.isEmpty()) {
+            System.out.println("No pending orders to process.");
+            return;
+        }
+
+        Order currentOrder = orderQueue.poll(); // Removes highest-priority order
+        Product product = productCatalog.get(currentOrder.getProductId());
+        
+        String logEntry = String.format("Processed Order '%s' for Product '%s' (Price: $%.2f, Priority: %d)",
+                currentOrder.getOrderId(), product.getName(), product.getPrice(), currentOrder.getPriority());
+
+        executionHistory.add(logEntry);
+        System.out.println(">>> " + logEntry);
+    }
+
+    // Print fulfilled order history
+    public void displayExecutionHistory() {
+        System.out.println("\n--- Completed Order History (Linear Record) ---");
+        for (String record : executionHistory) {
+            System.out.println(record);
+        }
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        OnlineShoppingSystem shop = new OnlineShoppingSystem();
+
+        System.out.println("=== 1. POPULATING PRODUCT CATALOG ===");
+        shop.addProduct(new Product("P101", "Laptop", 1200.00));
+        shop.addProduct(new Product("P102", "Smartphone", 800.00));
+        shop.addProduct(new Product("P103", "Headphones", 150.00));
+
+        System.out.println("\n=== 2. SEARCHING PRODUCT BY ID ===");
+        String searchId = "P102";
+        Product foundProduct = shop.searchProductById(searchId);
+        if (foundProduct != null) {
+            System.out.println("Found Product: " + foundProduct);
+        } else {
+            System.out.println("Product not found.");
+        }
+
+        System.out.println("\n=== 3. PLACING ORDERS (VARIOUS PRIORITIES) ===");
+        // Priority: 1 = VIP, 2 = Express, 3 = Standard
+        shop.placeOrder(new Order("ORD-001", "P101", 3)); // Standard
+        shop.placeOrder(new Order("ORD-002", "P103", 1)); // VIP
+        shop.placeOrder(new Order("ORD-003", "P102", 2)); // Express
+        shop.placeOrder(new Order("ORD-004", "P101", 1)); // VIP
+
+        System.out.println("\n=== 4. PROCESSING ORDERS BY PRIORITY ===");
+        while (true) {
+            Product check = shop.searchProductById("P101"); // Quick check test
+            if (check == null) break;
+            
+            // Drain queue
+            try {
+                shop.processNextOrder();
+            } catch (Exception e) {
+                break;
+            }
+        }
+
+        shop.displayExecutionHistory();
+    }
+}

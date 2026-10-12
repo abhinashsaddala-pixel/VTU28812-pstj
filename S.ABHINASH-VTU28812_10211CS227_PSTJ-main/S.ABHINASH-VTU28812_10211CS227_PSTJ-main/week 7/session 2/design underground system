@@ -1,0 +1,64 @@
+import java.util.HashMap;
+import java.util.Map;
+
+class UndergroundSystem {
+
+    // Class to store check-in details
+    private static class CheckInInfo {
+        String stationName;
+        int checkInTime;
+
+        CheckInInfo(String stationName, int checkInTime) {
+            this.stationName = stationName;
+            this.checkInTime = checkInTime;
+        }
+    }
+
+    // Class to aggregate journey details
+    private static class RouteData {
+        double totalTime;
+        int count;
+
+        RouteData(double totalTime, int count) {
+            this.totalTime = totalTime;
+            this.count = count;
+        }
+    }
+
+    // Stores ongoing trips: passenger ID -> CheckInInfo
+    private Map<Integer, CheckInInfo> checkInMap;
+    
+    // Stores aggregated trip stats: "startStation->endStation" -> RouteData
+    private Map<String, RouteData> routeMap;
+
+    public UndergroundSystem() {
+        checkInMap = new HashMap<>();
+        routeMap = new HashMap<>();
+    }
+    
+    public void checkIn(int id, String stationName, int t) {
+        checkInMap.put(id, new CheckInInfo(stationName, t));
+    }
+    
+    public void checkOut(int id, String stationName, int t) {
+        // Retrieve and remove check-in information for the customer
+        CheckInInfo checkInInfo = checkInMap.remove(id);
+        
+        String routeKey = checkInInfo.stationName + "->" + stationName;
+        double duration = t - checkInInfo.checkInTime;
+
+        // Update aggregated statistics for this route
+        RouteData routeData = routeMap.getOrDefault(routeKey, new RouteData(0.0, 0));
+        routeData.totalTime += duration;
+        routeData.count += 1;
+        
+        routeMap.put(routeKey, routeData);
+    }
+    
+    public double getAverageTime(String startStation, String endStation) {
+        String routeKey = startStation + "->" + endStation;
+        RouteData routeData = routeMap.get(routeKey);
+        
+        return routeData.totalTime / routeData.count;
+    }
+}

@@ -1,0 +1,29 @@
+import java.util.Scanner;
+
+public class Solution {
+    public static String timeConversion(String s) {
+        // Extract period (AM/PM)
+        String period = s.substring(8);
+        int hour = Integer.parseInt(s.substring(0, 2));
+        String rest = s.substring(2, 8); // minutes and seconds
+
+        if (period.equals("AM")) {
+            if (hour == 12) {
+                hour = 0; // midnight case
+            }
+        } else { // PM
+            if (hour != 12) {
+                hour += 12; // add 12 for afternoon/evening
+            }
+        }
+
+        return String.format("%02d%s", hour, rest);
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String s = sc.next();
+        System.out.println(timeConversion(s));
+        sc.close();
+    }
+}

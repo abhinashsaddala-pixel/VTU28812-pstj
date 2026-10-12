@@ -1,0 +1,100 @@
+import java.util.Scanner;
+
+// 1. Create the Payment interface
+interface Payment {
+    void pay(double amount);
+}
+
+// 2. Implement the interface using three concrete classes
+class CreditCardPayment implements Payment {
+    @Override
+    public void pay(double amount) {
+        // Implementation of the pay method
+    }
+}
+
+class UPIPayment implements Payment {
+    @Override
+    public void pay(double amount) {
+        // Implementation of the pay method
+    }
+}
+
+class NetBankingPayment implements Payment {
+    @Override
+    public void pay(double amount) {
+        // Implementation of the pay method
+    }
+}
+
+// 3. Create the abstract class PaymentProcessor
+abstract class PaymentProcessor {
+    abstract double processPayment(Payment payment, double amount);
+}
+
+// 4. Create the concrete class OnlinePaymentProcessor extending PaymentProcessor
+class OnlinePaymentProcessor extends PaymentProcessor {
+    @Override
+    double processPayment(Payment payment, double amount) {
+        double feePercent = 0.0;
+        
+        // Use polymorphism and type checking to determine processing fees
+        // This design allows new types to be added seamlessly.
+        if (payment instanceof CreditCardPayment) {
+            feePercent = 0.02; // 2% fee
+        } else if (payment instanceof UPIPayment) {
+            feePercent = 0.01; // 1% fee
+        } else if (payment instanceof NetBankingPayment) {
+            feePercent = 0.015; // 1.5% fee
+        }
+        
+        double finalAmount = amount + (amount * feePercent);
+        payment.pay(finalAmount); // Execute the payment contract rule
+        return finalAmount;
+    }
+}
+
+// 5. Execution Main Class
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(String.class.cast(System.in == null ? null : System.in));
+        if (!sc.hasNextInt()) {
+            sc.close();
+            return;
+        }
+        
+        int n = sc.nextInt();
+        PaymentProcessor processor = new OnlinePaymentProcessor();
+        
+        for (int i = 0; i < n; i++) {
+            int paymentType = sc.nextInt();
+            double amount = sc.nextDouble();
+            
+            Payment payment = null;
+            String typeName = "";
+            
+            switch (paymentType) {
+                case 1:
+                    payment = new CreditCardPayment();
+                    typeName = "CreditCard";
+                    break;
+                case 2:
+                    payment = new UPIPayment();
+                    typeName = "UPI";
+                    break;
+                case 3:
+                    payment = new NetBankingPayment();
+                    typeName = "NetBanking";
+                    break;
+                default:
+                    continue;
+            }
+            
+            if (payment != null) {
+                double finalAmount = processor.processPayment(payment, amount);
+                System.out.printf("%s %.2f\n", typeName, finalAmount);
+            }
+        }
+        sc.close();
+    }
+}

@@ -1,0 +1,94 @@
+import java.io.*;
+import java.math.*;
+import java.security.*;
+import java.text.*;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.regex.*;
+
+class Result {
+
+    /*
+     * Complete the 'matrixRotation' function below.
+     *
+     * The function accepts following PARAMETERS:
+     *  1. 2D_INTEGER_ARRAY matrix
+     *  2. INTEGER r
+     */
+
+    public static void matrixRotation(List<List<Integer>> matrix, int r) {
+        int m = matrix.size();
+        int n = matrix.get(0).size();
+        int numLayers = Math.min(m, n) / 2;
+        
+        int[][] res = new int[m][n];
+
+        for (int layer = 0; layer < numLayers; layer++) {
+            int top = layer;
+            int bottom = m - 1 - layer;
+            int left = layer;
+            int right = n - 1 - layer;
+
+            List<int[]> coords = new ArrayList<>();
+
+            // Top edge
+            for (int col = left; col < right; col++) coords.add(new int[]{top, col});
+            // Right edge
+            for (int row = top; row < bottom; row++) coords.add(new int[]{row, right});
+            // Bottom edge
+            for (int col = right; col > left; col--) coords.add(new int[]{bottom, col});
+            // Left edge
+            for (int row = bottom; row > top; row--) coords.add(new int[]{row, left});
+
+            int len = coords.size();
+            int rot = r % len;
+
+            for (int i = 0; i < len; i++) {
+                int[] orig = coords.get((i + rot) % len);
+                int[] dest = coords.get(i);
+                res[dest[0]][dest[1]] = matrix.get(orig[0]).get(orig[1]);
+            }
+        }
+
+        // Print output
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                sb.append(res[i][j]).append(j == n - 1 ? "" : " ");
+            }
+            sb.append("\n");
+        }
+        System.out.print(sb.toString());
+    }
+}
+
+public class Solution {
+    public static void main(String[] args) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+
+        String[] firstMultipleInput = bufferedReader.readLine().replaceAll("\\s+$", "").split(" ");
+
+        int m = Integer.parseInt(firstMultipleInput[0]);
+        int n = Integer.parseInt(firstMultipleInput[1]);
+        int r = Integer.parseInt(firstMultipleInput[2]);
+
+        List<List<Integer>> matrix = new ArrayList<>();
+
+        for (int i = 0; i < m; i++) {
+            String[] matrixRowTempItems = bufferedReader.readLine().replaceAll("\\s+$", "").split(" ");
+
+            List<Integer> matrixRowItems = new ArrayList<>();
+
+            for (int j = 0; j < n; j++) {
+                int matrixItem = Integer.parseInt(matrixRowTempItems[j]);
+                matrixRowItems.add(matrixItem);
+            }
+
+            matrix.add(matrixRowItems);
+        }
+
+        Result.matrixRotation(matrix, r);
+
+        bufferedReader.close();
+    }
+}

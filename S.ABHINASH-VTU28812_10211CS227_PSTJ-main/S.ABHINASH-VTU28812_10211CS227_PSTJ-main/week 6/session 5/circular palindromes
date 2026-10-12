@@ -1,0 +1,78 @@
+import java.io.*;
+import java.util.*;
+
+public class Solution {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String nStr = br.readLine();
+        if (nStr == null || nStr.trim().isEmpty()) return;
+        
+        int n = Integer.parseInt(nStr.trim());
+        String s = br.readLine().trim();
+
+        if (n == 0) return;
+
+        // Double the string S to handle cyclic rotations
+        String s2 = s + s;
+        int m = s2.length();
+
+        // 1. Run Manacher's Algorithm on S + S
+        char[] T = new char[2 * m + 3];
+        T[0] = '^';
+        int tIdx = 1;
+        for (int i = 0; i < m; i++) {
+            T[tIdx++] = '#';
+            T[tIdx++] = s2.charAt(i);
+        }
+        T[tIdx++] = '#';
+        T[tIdx++] = '$';
+
+        int[] P = new int[T.length];
+        int C = 0, R = 0;
+
+        for (int i = 1; i < T.length - 1; i++) {
+            int iMirror = 2 * C - i;
+            if (R > i) {
+                P[i] = Math.min(R - i, P[iMirror]);
+            }
+            while (T[i + 1 + P[i]] == T[i - 1 - P[i]]) {
+                P[i]++;
+            }
+            if (i + P[i] > R) {
+                C = i;
+                R = i + P[i];
+            }
+        }
+
+        // 2. Identify max palindromes per center in S + S
+        int[] ans = new int[n];
+
+        // Process odd and even centers separately
+        // Max possible palindrome in a window of size N
+        for (int k = 0; k < n; k++) {
+            int maxLen = 0;
+            // Iterate over center candidates for rotation k [k ... k + n - 1]
+            // Optimized: We can query maximum spans
+            for (int center = 2 * k + 2; center <= 2 * (k + n) - 2; center++) {
+                int rad = P[center];
+                // Distance to left and right boundary of window [k, k + n - 1]
+                int leftBound = 2 * k + 1;
+                int rightBound = 2 * (k + n) + 1;
+
+                int actualRad = Math.min(rad, Math.min(center - leftBound, rightBound - center));
+                int len = actualRad;
+                if (len > maxLen) {
+                    maxLen = len;
+                }
+            }
+            ans[k] = maxLen;
+        }
+
+        // Output results
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            sb.append(ans[i]).append("\n");
+        }
+        System.out.print(sb.toString());
+    }
+}

@@ -1,0 +1,107 @@
+import java.util.Scanner;
+
+// Base class Vehicle
+class Vehicle {
+    protected String vehicleNumber;
+    protected double rentPerDay;
+
+    public Vehicle(String vehicleNumber, double rentPerDay) {
+        this.vehicleNumber = vehicleNumber;
+        this.rentPerDay = rentPerDay;
+    }
+
+    public String getVehicleNumber() {
+        return vehicleNumber;
+    }
+
+    // Method to be overridden by subclasses
+    public double calculateRent(int days) {
+        return 0.0;
+    }
+}
+
+// Subclass Car
+class Car extends Vehicle {
+    public Car(String vehicleNumber, double rentPerDay) {
+        super(vehicleNumber, rentPerDay);
+    }
+
+    @Override
+    public double calculateRent(int days) {
+        return rentPerDay * days;
+    }
+}
+
+// Subclass Bike
+class Bike extends Vehicle {
+    public Bike(String vehicleNumber, double rentPerDay) {
+        super(vehicleNumber, rentPerDay);
+    }
+
+    @Override
+    public double calculateRent(int days) {
+        return rentPerDay * days * 0.90; // 10% discount
+    }
+}
+
+// Subclass Truck
+class Truck extends Vehicle {
+    public Truck(String vehicleNumber, double rentPerDay) {
+        super(vehicleNumber, rentPerDay);
+    }
+
+    @Override
+    public double calculateRent(int days) {
+        return rentPerDay * days * 1.20; // 20% additional charge
+    }
+}
+
+// Main class
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Read total number of vehicles
+        if (scanner.hasNextInt()) {
+            int n = scanner.nextInt();
+            
+            // Array of Vehicle pointers demonstrating runtime polymorphism
+            Vehicle[] vehicles = new Vehicle[n];
+            int[] rentalDays = new int[n];
+
+            for (int i = 0; i < n; i++) {
+                int type = scanner.nextInt();
+                String vNo = scanner.next();
+                double rent = scanner.nextDouble();
+                int days = scanner.nextInt();
+
+                rentalDays[i] = days;
+
+                // Polymorphic object creation based on input type
+                switch (type) {
+                    case 1:
+                        vehicles[i] = new Car(vNo, rent);
+                        break;
+                    case 2:
+                        vehicles[i] = new Bike(vNo, rent);
+                        break;
+                    case 3:
+                        vehicles[i] = new Truck(vNo, rent);
+                        break;
+                    default:
+                        vehicles[i] = null;
+                        break;
+                }
+            }
+
+            // Output the calculated rent using runtime polymorphism
+            for (int i = 0; i < n; i++) {
+                if (vehicles[i] != null) {
+                    double totalRent = vehicles[i].calculateRent(rentalDays[i]);
+                    System.out.printf("%s %.2f\n", vehicles[i].getVehicleNumber(), totalRent);
+                }
+            }
+        }
+        scanner.close();
+    }
+}

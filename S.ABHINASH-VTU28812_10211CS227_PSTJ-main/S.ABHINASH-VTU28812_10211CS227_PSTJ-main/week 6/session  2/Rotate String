@@ -1,0 +1,11 @@
+class Solution {
+    public boolean rotateString(String s, String goal) {
+        // Step 1: Check if the lengths are equal
+        if (s.length() != goal.length()) {
+            return false;
+        }
+        
+        // Step 2: Concatenate s with itself and check if goal is a substring
+        return (s + s).contains(goal);
+    }
+}
